@@ -26,12 +26,12 @@ juce_add_plugin(${BaseTargetName}
         FORMATS AU AUv3 VST3 LV2 Standalone
         LV2URI https://github.com/atsushieno/OB-X-AE
         PRODUCT_NAME OB-X-AE
-        )
+)
 
 clap_juce_extensions_plugin(TARGET ${BaseTargetName}
         CLAP_ID https://github.com/atsushieno/OB-X-AE
         CLAP_FEATURES instrument
-        )
+)
 
 juce_generate_juce_header(${BaseTargetName})
 
@@ -40,14 +40,14 @@ target_compile_definitions(${BaseTargetName}
         JUCE_WEB_BROWSER=0
         JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
-        )
+)
 
 target_link_libraries(${BaseTargetName} PRIVATE
         juce_audio_utils
         juce_recommended_config_flags
         juce_recommended_lto_flags
         juce_recommended_warning_flags
-        )
+)
 
 target_sources(${BaseTargetName}
         PRIVATE
@@ -58,7 +58,7 @@ target_sources(${BaseTargetName}
         external/OB-Xx/Source/PluginEditor.cpp
         external/OB-Xx/Source/PluginProcessor.cpp
         external/OB-Xx/Source/Utils.cpp
-        )
+)
 
 # might be unnecessary
 juce_add_binary_data(${BaseTargetName}_BinaryData
@@ -79,7 +79,7 @@ target_include_directories(${BaseTargetName}
         external/OB-Xx/Source
         external/OB-Xx
         # there was some weird path dependency...
-        )
+)
 
 target_link_libraries(${BaseTargetName}
         PRIVATE
@@ -122,15 +122,18 @@ function(apply_patch_if_needed PATCH_FILE SOURCE_DIR)
 
         # Check if the stamp file exists and is newer than the patch file
         if(EXISTS "${STAMP_FILE}" AND "${STAMP_FILE}" IS_NEWER_THAN "${PATCH_FILE_ABS}")
-                message(STATUS "Patch ${PATCH_FILENAME} already applied to ${SOURCE_DIR}")
+                message("Patch ${PATCH_FILENAME} already applied to ${SOURCE_DIR}")
         else()
-                message(STATUS "Applying patch ${PATCH_FILENAME} to ${SOURCE_DIR}")
+                message("Applying git patch ${PATCH_FILE_ABS} at ${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR}")
 
                 # Apply the patch
                 execute_process(
-                        COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR} git apply ${PATCH_FILE_ABS}
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/${SOURCE_DIR}
+                        COMMAND git apply ${PATCH_FILE_ABS}
                 )
+                file(TOUCH ${STAMP_FILE})
         endif()
 endfunction()
 
 apply_patch_if_needed(ob-x-ae.patch external/OB-Xx)
+
